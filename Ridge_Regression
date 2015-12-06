@@ -1,0 +1,53 @@
+# Ridge-Regression-with-Python
+
+# This is the HW5, Q19 solution for Machine Learning Foundation by Hsuan-Tien Lin on Coursera.
+# This is the bunch of codes for 5-fold Cross Validation of Ridge Regression using Python.
+# All rights reserved by Tianjia Chen, Yale University.
+
+import numpy as np
+
+# Read the data and create X and Y
+f1 = open("ntumlone-hw4-hw4_train.dat")
+x_train = []
+y_train = []
+
+for line in f1:
+	a = str.split(line)
+	x_train.extend(a[0:2])
+	y_train.append(a[2])
+
+x_train = np.asarray(x_train).astype(float).reshape((-1,2), order = "C")
+y_train = np.asarray(y_train).astype(float).reshape((-1,1))
+
+n_train = x_train.shape[0]
+
+# Add intercept into design matrix
+x_train = np.c_[np.ones(n_train).reshape(-1,1), x_train]
+
+# Set a series of lambda = 10^lam_base
+lam_base=range(-10, 3, 1)
+Ein = []
+Eout = []
+
+for i in lam_base:
+  # cv keeps average CV under each lambda
+	cv= []
+	for j in range(5):
+		index = range(40*j, 40*(j+1), 1)
+		xx_test = x_train[index,]
+		xx_train = np.delete(x_train, index, 0)
+
+		yy_test = y_train[index]
+		n_test = np.shape(yy_test)[0]
+		yy_train = np.delete(y_train, index, 0)
+
+		x1 = np.transpose(xx_train).dot(xx_train)+10**i * np.eye(3)
+		w = np.linalg.inv(x1).dot(np.transpose(xx_train)).dot(yy_train)
+
+		p_test = xx_test.dot(w)
+
+		pre_test = np.where(p_test>=0, 1, -1)
+
+		Eout = (sum(pre_test != yy_test)/float(n_test)).tolist()
+		cv += Eout
+	print sum(cv)/5.0
